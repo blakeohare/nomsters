@@ -30,7 +30,8 @@
 		{ "name": "game_title", "value": "Nomsters" },
 		{ "name": "initial_scene", "value": "MainMenu" },
 		{ "name": "use_60_fps", "value": true },
-		{ "name": "enable_wasd", "value": true }
+		{ "name": "enable_wasd", "value": true },
+		{ "name": "thumbnail", "value": "assets/thumbnail.jpg" }
 	],
 	
 	"targets": [
