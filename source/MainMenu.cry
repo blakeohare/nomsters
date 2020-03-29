@@ -222,7 +222,7 @@ class MainMenu : AbstractScene {
 			0, 0,
 			bg.width, bg.height);//*/
 		Graphics2D.Draw.fill(50, 60, 70);
-		Globals.FONT_RENDERER.render_text("SHAPE SHIFTER", 85, 10, 'giant', 3);
+		Globals.FONT_RENDERER.render_text("NOMSTERS", 145, 10, 'giant', 3);
 		
 		Globals.FONT_RENDERER.render_text("1 Player Modes:", 10, 100, 'big', 2);
 		this.button_survival = this.render_button_and_return_click_range('SURVIVAL', 10, 150, 'giant', rc, this.active_button == 'survival');
