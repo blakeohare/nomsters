@@ -1,0 +1,82 @@
+
+const INIT_COUNT = 8;
+
+class GameMode {
+
+	field id;
+	field player_spacing_x;
+	field render_left;
+	field render_top;
+	field render_gap;
+	field columns;
+	field rows;
+	field boards;
+	field players_per_board;
+	field fall_enabled;
+	field magic_orb;
+	field start_height;
+	field player_start_x;
+	field player_start_y;
+	field players_total;
+
+	constructor(id) {
+		this.id = id;
+		this.player_spacing_x = 1;
+		this.render_left = 160;
+		this.render_top = 10;
+		this.render_gap = 40;
+		this.columns = 8;
+		this.rows = 14;
+		this.boards = 1;
+		this.players_per_board = 1;
+		this.fall_enabled = true;
+		this.magic_orb = false;
+		switch (id) {
+			case 'survival':
+				this.start_height = INIT_COUNT;
+				this.player_start_x = this.columns / 2;
+				this.player_start_y = this.rows * 3 / 4;
+				break;
+			
+			case 'timed':
+				this.fall_enabled = false;
+				this.start_height = this.rows * 2 / 3;
+				this.player_start_x = this.columns / 2;
+				this.player_start_y = this.rows * 3 / 4;
+				break;
+			
+			case 'vsplay':
+				this.boards = 2;
+				this.start_height = this.rows / 2;
+				this.player_start_x = this.columns / 2;
+				this.player_start_y = this.rows * 3 / 4;
+				this.render_left = 80;
+				break;
+			
+			case 'coop':
+				this.players_per_board = 2;
+				this.start_height = this.rows / 2;
+				this.columns = 15;
+				this.player_start_x = this.columns / 3;
+				this.player_start_y = this.rows * 3 / 4;
+				this.player_spacing_x = this.columns / 3;
+				break;
+				
+			case 'race':
+				this.players_per_board = 2;
+				this.magic_orb = true;
+				this.fall_enabled = false;
+				this.columns = 25;
+				this.start_height = this.rows;
+				start_offset_x = 2;
+				this.player_start_x = start_offset_x;
+				this.player_start_y = this.rows / 2;
+				this.player_spacing_x = this.columns - start_offset_x * 2;
+				break;
+			
+			default:
+				throw new Exception("WAT");
+		}
+		this.players_total = this.players_per_board * this.boards;
+	}
+}

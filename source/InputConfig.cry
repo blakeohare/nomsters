@@ -1,0 +1,100 @@
+class InputConfig {
+	
+	field player1;
+	field player2;
+	field universal;
+	
+	constructor() {
+		this.player1 = {
+			'a': 'left',
+			'w': 'up',
+			'd': 'right',
+			's': 'down',
+			'space': 'eat',
+			'escape': 'escape',
+		};
+		
+		this.player2 = {
+			'left': 'left',
+			'up': 'up',
+			'right': 'right',
+			'down': 'down',
+			'enter': 'eat',
+			'escape': 'escape',
+		};
+		
+		this.universal = {
+			'left': 'left',
+			'up': 'up',
+			'right': 'right',
+			'down': 'down',
+			'enter': 'eat',
+			'space': 'eat',
+			'escape': 'escape',
+		};
+	}
+	
+	function get_config_for_player(player) {
+		lookup = player == 1 ? this.player1 : this.player2;
+		output = {};
+		for (key : lookup.keys()) {
+			value = lookup[key];
+			output[value] = key;
+		}
+		return output;
+	}
+	
+	function set_config_for_player(player, action, key) {
+		lookup = player == 1 ? this.player1 : this.player2;
+		lookup[key] = action;
+	}
+	
+	/*
+	 * If p2 is active, check p2 and return a p2 event. 
+	 * If no event was found or p2 wasn't active, proceed through the following lookups:
+	 *  p1, p2, universal
+	 * and return the first found event as a p1 event. The redundant p2 check is harmless.
+	 *
+	 * Mouse events are ALWAYS p1 events
+	 */
+	function get_game_action(native_event, p1active, p2active) {
+		if (native_event.is_mouse) {
+			switch (native_event.type) {
+				case 'mousemove':
+					return new Event('mousemove', native_event.x, native_event.y, 1);
+				case 'mouseleftdown':
+					return new Event('click', native_event.x, native_event.y, 1);
+				default: return null;
+			}
+			return null; // ignore scroll
+		}
+		
+		if (native_event.is_key && native_event.down) {
+			key = native_event.key;
+			
+			if (p2active) {
+				if (!p1active) {
+					throw new Exception("Bad state"); // p2 should never be active by itself
+				}
+				
+				action = this.player2.get(key, null);
+				if (action != null) {
+					return new Event(action, 0, 0, 2);
+				}
+			}
+			
+			action = this.player1.get(key, null);
+			if (action == null) {
+				action = this.player2.get(key, null);
+			}
+			if (action == null) {
+				action = this.universal.get(key, null);
+			}
+			
+			if (action != null) {
+				return new Event(action, 0, 0, 1);
+			}
+		}
+		return null;
+	}
+}

@@ -1,0 +1,131 @@
+class FontRenderer {
+
+	static field INSTANCE = null;
+	
+	field images_by_char_by_size;
+	field sizes;
+	field ratios;
+	field ratios_by_size;
+	
+	constructor() {
+		this.images_by_char_by_size = null;
+		this.sizes = ['small', 'big', 'giant'];
+		this.ratios = [1, 2, 4];
+		this.ratios_by_size = {};
+		for (i = 0; i < this.sizes.length; ++i) {
+			this.ratios_by_size[this.sizes[i]] = this.ratios[i];
+		}
+	}
+	
+	function initialize() {
+		if (this.images_by_char_by_size == null) {
+			ratio = [1, 2, 4];
+			by_sizes = {};
+			for (j = 0; j < this.sizes.length; ++j) {
+				g = this.g;
+				size = this.sizes[j];
+				lookup = {
+					'&': this.g('ampersand', size),
+					"'": this.g('apostrophe', size),
+					'*': this.g('asterisk', size),
+					'@': this.g('at', size),
+					'\\': this.g('backslash', size),
+					'`': this.g('backtick', size),
+					'!': this.g('bang', size),
+					'}': this.g('close_brace', size),
+					']': this.g('close_bracket', size),
+					')': this.g('close_paren', size),
+					':': this.g('colon', size),
+					',': this.g('comma', size),
+					'=': this.g('equals', size),
+					'^': this.g('exp', size),
+					'>': this.g('greaterthan', size),
+					'#': this.g('hash', size),
+					'-': this.g('hyphen', size),
+					'<': this.g('lessthan', size),
+					'$': this.g('moneys', size),
+					'{': this.g('open_brace', size),
+					'[': this.g('open_bracket', size),
+					'(': this.g('open_paren', size),
+					'%': this.g('percentage', size),
+					'.': this.g('period', size),
+					'|': this.g('pipe', size),
+					'+': this.g('plus', size),
+					'?': this.g('question', size),
+					'"': this.g('quote', size),
+					';': this.g('semicolon', size),
+					'/': this.g('slash', size),
+					'~': this.g('tilde', size),
+					'_': this.g('underscore', size)
+				};
+				letters = 'abcdefghijklmnopqrstuvwxyz';
+				for (i = 0; i < letters.length; ++i) {
+					c = letters[i];
+					lookup[c] = this.g(c + '_lower', size);
+					lookup[c.upper()] = this.g(c + '_upper', size);
+				}
+				for (i = 0; i < 10; ++i) {
+					lookup['' + i] = this.g('num_' + i, size);
+				}
+				
+				by_sizes[size] = lookup;
+			}
+			this.images_by_char_by_size = by_sizes;
+		}
+	}
+	
+	function g(key, size) {
+		return ImageLibrary.get_image('letters/' + key);
+	}
+	
+	function render_text(text, x, y, size, shadow_level) {
+		this.initialize();
+		lookup = this.images_by_char_by_size['small'];
+		unknown = lookup['?'];
+		width = unknown.width;
+		height = unknown.height;
+		ratio = this.ratios_by_size[size];
+		for (i = 0; i < text.length; ++i) {
+			c = text[i];
+			if (c == '\t') {
+				x += width * 3;
+			} else if (c != ' ') {
+				img = lookup.get(c, unknown);
+				for (j = shadow_level; j > 0; --j) {
+					for (k = 1; k >= 0; --k) {
+						if (ratio == 1) {
+							img.draw(x + ratio * j + ratio * k, y + ratio * j);
+						} else {
+							img.drawRegionStretched(
+								x + ratio * j + ratio * k, y + ratio * j,
+								img.width * ratio, img.height * ratio,
+								0, 0,
+								img.width, img.height);
+								
+						}
+					}
+				}
+				if (ratio == 1) {
+					img.draw(x + ratio, y);
+				} else {
+					img.drawRegionStretched(
+						x + ratio, y,
+						img.width * ratio, img.height * ratio,
+						0, 0,
+						img.width, img.height);
+				}
+			}
+			x += width * ratio;
+		}
+		return [x, y + height + ratio * shadow_level];
+	}
+	
+}
+
+function render_text(text, x, y, size, shadow_level) {
+	if (FontRenderer.INSTANCE == null) {
+		FontRenderer.INSTANCE = new FontRenderer();
+	}
+	
+	FontRenderer.INSTANCE.render_text(text, x, y, size, shadow_level);
+}

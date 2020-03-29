@@ -1,0 +1,15 @@
+import TwoCansAlpha4;
+
+class InputConfigScene : AbstractScene {
+	constructor() : base() {
+	
+	}
+	
+	function update(inputManager, events) {
+		
+	}
+	
+	function render() {
+	
+	}
+}

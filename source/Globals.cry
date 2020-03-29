@@ -1,0 +1,30 @@
+static class Globals {
+
+	static field ALL_COLORS = [Colors.RED, Colors.GREEN, Colors.BLUE, Colors.YELLOW, Colors.ORANGE, Colors.PURPLE];
+
+	static field _COLORS = [null] * 7;
+
+	static constructor() {
+		Globals._COLORS[Colors.RED] = [255, 0, 0];
+		Globals._COLORS[Colors.GREEN] = [0, 128, 0];
+		Globals._COLORS[Colors.BLUE] = [0, 0, 255];
+		Globals._COLORS[Colors.YELLOW] = [255, 255, 0];
+		Globals._COLORS[Colors.ORANGE] = [255, 128, 0];
+		Globals._COLORS[Colors.PURPLE] = [128, 0, 128];
+		
+		Globals.SOUND_MANAGER = new SoundManager();
+		Globals.FONT_RENDERER = new FontRenderer();
+	}
+
+	static field THEMES = [
+		'desert',
+		'fruits',
+		'microbes',
+		'ocean',
+		'shapes',
+		'space'
+	];
+	
+	static field SOUND_MANAGER;
+	static field FONT_RENDERER;
+}

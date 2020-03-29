@@ -1,0 +1,63 @@
+import Graphics2D;
+import TwoCansAlpha4;
+
+class VictoryScene : AbstractScene {
+	
+	field type;
+	field bg;
+	field counter;
+	
+	/*
+	 * Types:
+	 * - win
+	 * - p1win
+	 * - p2win
+	 * - lose
+	 */
+	constructor(playscene, type) : base() {
+		this.type = type;
+		this.bg = playscene;
+		this.counter = 0;
+	}
+	
+	function update(inputManager, events) {
+		this.counter++;
+		
+		for (e : events) {
+			if (e.type == EventType.MENU && e.button == MenuCommand.CONFIRM) {
+				if (this.counter > FPS) {
+					this.switchScene(new MainMenu());
+				}
+			}
+		}
+	}
+	
+	function render() {
+		this.bg.render();
+		alpha = this.counter * 3;
+		if (alpha > 128) {
+			alpha = 128;
+		}
+		Graphics2D.Draw.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0, 0, 0, alpha);
+		x = GAME_WIDTH / 3;
+		switch (this.type) {
+			case 'win':
+				text = "YOU WIN!";
+				break;
+			case 'lose':
+				text = "YOU LOSE!";
+				break;
+			case 'p1win':
+				text = "PLAYER 1 WINS!";
+				x = GAME_WIDTH / 5;
+				break;
+			case 'p2win':
+				text = "PLAYER 2 WINS!";
+				x = GAME_WIDTH / 5;
+				break;
+			default:
+				throw new Exception();
+		}	
+		Globals.FONT_RENDERER.render_text(text, x, 200, 'giant', 5);
+	}
+}

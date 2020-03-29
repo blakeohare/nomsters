@@ -1,0 +1,278 @@
+import Graphics2D;
+import Math;
+import TwoCansAlpha4;
+
+class MainMenu : AbstractScene {
+	
+	field button_survival;
+	field button_timed;
+	field button_vsplay;
+	field button_coop;
+	field button_race;
+	//field button_tutorial;
+	//field button_input;
+	field active_button;
+	field marquee_offset;
+	field tile_images;
+	field previous_active_button;
+	
+	constructor() : base() {
+		this.button_survival = [0] * 4;
+		this.button_timed = [0] * 4;
+		this.button_vsplay = [0] * 4;
+		this.button_coop = [0] * 4;
+		this.button_race = [0] * 4;
+		//this.button_tutorial = [0] * 4;
+		//this.button_input = [0] * 4;
+		
+		this.active_button = 'survival';
+		this.previous_active_button = 'survival';
+		
+		this.tile_images = [];
+		// TODO: use globals on the next two lines
+		colors = 'blue green orange yellow red purple'.split(' ');
+		for (theme : 'desert fruits microbes ocean shapes space'.split(' ')) {
+			for (color : colors) {
+				img = ImageLibrary.get_image('tiles/' + theme + '/' + color);
+				this.tile_images.add(img);
+			}
+		}
+		
+		this.marquee_offset = 0;
+		this.tile_images.shuffle();
+	}
+	
+	function move_cursor(dir) {
+		button = this.active_button;
+		if (button == null) {
+			button = this.previous_active_button;
+		}
+		
+		new_button = button;
+		switch (button + '-' + dir) {
+			case 'timed-up':
+			case 'vsplay-left':
+				new_button = 'survival';
+				break;
+			
+			case 'survival-down':
+			case 'coop-left':
+			case 'race-left':
+			//case 'tutorial-up':
+				new_button = 'timed';
+				break;
+			
+			case 'survival-right':
+			case 'coop-up':
+				new_button = 'vsplay';
+				break;
+			
+			case 'vsplay-down':
+			case 'timed-right':
+			case 'race-up':
+				new_button = 'coop';
+				break;
+			
+			case 'coop-down':
+			//case 'input-up':
+				new_button = 'race';
+				break;
+			/*
+			case 'timed-down':
+			case 'input-left':
+				new_button = 'tutorial';
+				break;
+			
+			case 'race-down':
+			case 'tutorial-right':
+				new_button = 'input';
+				break;
+			//*/
+			default: break;
+		}
+		
+		if (new_button != button) {
+			Globals.SOUND_MANAGER.play_sound('menu_move');
+		}
+		
+		this.previous_active_button = button;
+		this.active_button = new_button;
+	}
+	
+	function invoke_active_button(mouse_must_be_over_active, x, y) {
+		button = this.active_button;
+		
+		if (mouse_must_be_over_active) {
+			button = this.get_button_for_coord(x, y);
+		}
+		
+		if (button == null) {
+			return;
+		}
+		
+		switch (button) {
+			case 'survival':
+				this.switchSceneFade(new PlayScene('survival'));
+				break;
+			
+			case 'timed':
+				this.switchSceneFade(new PlayScene('timed'));
+				break;
+			
+			case 'coop':
+				this.switchSceneFade(new PlayScene('coop'));
+				break;
+			
+			case 'vsplay':
+				this.switchSceneFade(new PlayScene('vsplay'));
+				break;
+			
+			case 'race':
+				this.switchSceneFade(new PlayScene('race'));
+				break;
+			/*
+			case 'tutorial':
+				this.switchSceneFade(new InstructionsScene());
+				break;
+			
+			case 'input':
+				this.switchSceneFade(new InputConfigScene());
+				break;
+			//*/
+			default:
+				break;
+		}
+	}
+	
+	function get_button_for_coord(x, y) {
+		buttons = {
+			'survival': this.button_survival,
+			'timed': this.button_timed,
+			'vsplay': this.button_vsplay,
+			'race': this.button_race,
+			'coop': this.button_coop,
+			//'tutorial': this.button_tutorial,
+			//'input': this.button_input,
+		};
+		
+		for (key : buttons.keys()) {
+			coords = buttons[key];
+			
+			if (x > coords[0] && x < coords[2] && y > coords[1] && y < coords[3]) {
+				return key;
+			}
+		}
+		
+		return null;
+	}
+	
+	function update_active_button(x, y) {
+		button = this.get_button_for_coord(x, y);
+		if (button != null) {
+			prev = this.active_button == null ? this.previous_active_button : this.active_button;
+			this.previous_active_button = prev;
+			this.active_button = button;
+			return;
+		}
+	}
+	
+	function legacyUpdate(render) {
+		throw new Exception();
+	}
+	
+	function update(inputManager, events) {
+		commit = false;
+		for (e : events) {
+			switch (e.type) {
+				case EventType.MENU:
+					switch (e.button) {
+						case MenuCommand.UP: this.move_cursor('up'); break;
+						case MenuCommand.DOWN: this.move_cursor('down'); break;
+						case MenuCommand.LEFT: this.move_cursor('left'); break;
+						case MenuCommand.RIGHT: this.move_cursor('right'); break;
+						case MenuCommand.CONFIRM: this.invoke_active_button(false, 0, 0); break;
+					}
+					break;
+				
+				case EventType.MOUSE_MOVE:
+					this.update_active_button(e.x, e.y);
+					break;
+					
+				case EventType.MOUSE_PRESS:
+					this.update_active_button(e.x, e.y);
+					this.invoke_active_button(true, e.x, e.y);
+					break;
+			}
+		}
+	}
+	
+	field _rc = 0;
+	
+	function legacyRender(rc) {
+		throw new Exception();
+	}
+	
+	function render() {
+		rc = this._rc++;
+		/*
+		bg = ImageLibrary.get_image('backgrounds/main_menu');
+		bg.drawRegionStretched(
+			0, 0,
+			GAME_WIDTH, GAME_HEIGHT,
+			0, 0,
+			bg.width, bg.height);//*/
+		Graphics2D.Draw.fill(50, 60, 70);
+		Globals.FONT_RENDERER.render_text("SHAPE SHIFTER", 85, 10, 'giant', 3);
+		
+		Globals.FONT_RENDERER.render_text("1 Player Modes:", 10, 100, 'big', 2);
+		this.button_survival = this.render_button_and_return_click_range('SURVIVAL', 10, 150, 'giant', rc, this.active_button == 'survival');
+		this.button_timed = this.render_button_and_return_click_range('TIMED', 10, 220, 'giant', rc, this.active_button == 'timed');
+		
+		left = 340;
+		Globals.FONT_RENDERER.render_text("2 Player Modes:", left, 100, 'big', 2);
+		this.button_vsplay = this.render_button_and_return_click_range("VS PLAY", left, 150, 'giant', rc, this.active_button == 'vsplay');
+		this.button_coop = this.render_button_and_return_click_range("CO-OP", left, 220, 'giant', rc, this.active_button == 'coop');
+		this.button_race = this.render_button_and_return_click_range("RACE", left, 290, 'giant', rc, this.active_button == 'race');
+		
+		//this.button_tutorial = this.render_button_and_return_click_range("TUTORIAL", 10, GAME_HEIGHT - 50, 'big', rc, this.active_button == 'tutorial');
+		//this.button_input = this.render_button_and_return_click_range("CONFIGURE INPUT", this.button_tutorial[2] + 70, GAME_HEIGHT - 50, 'big', rc, this.active_button == 'input');
+		
+		this.render_marquee(rc);
+	}
+	
+	function render_marquee(rc) {
+		width = 80;
+		padding = 10;
+		this.marquee_offset -= 2.5;
+		list_visual_width = (width + padding) * this.tile_images.length;
+		if (this.marquee_offset < -list_visual_width) {
+			this.marquee_offset += list_visual_width;
+		}
+		for (i = 0; i < this.tile_images.length * 2; ++i) {
+			img = this.tile_images[i % this.tile_images.length];
+			x = Math.floor(i * (width + padding) + this.marquee_offset);
+			y = 370;
+			
+			if (x > -width && x < GAME_WIDTH) {
+				img.drawRegionStretched(
+					x, y,
+					width, width,
+					0, 0,
+					img.width, img.height);
+			}
+		}
+	}
+	
+	function render_button_and_return_click_range(label, logical_x, logical_y, size, rc, bounce) {
+		button_offset = 0; 
+		if (bounce) {
+			button_offset = Math.floor(Math.abs(5 * Math.sin(rc * 3.14159 * 2 * 2 / FPS)));
+		}
+		button_x = logical_x;
+		button_y = logical_y + button_offset;
+		button_size = Globals.FONT_RENDERER.render_text(label, button_x, button_y, size, 2);
+		button_width = button_size[0] - button_x;
+		button_height = button_size[1] - button_y;
+		return [logical_x, logical_y, logical_x + button_width, logical_y + button_height];
+	}
+}

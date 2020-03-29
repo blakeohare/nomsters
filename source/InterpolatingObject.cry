@@ -1,0 +1,39 @@
+class InterpolatingObject {
+	
+	field renderX;
+	field renderY;
+	field actualX;
+	field actualY;
+	field isDirty = false;
+	
+	field velocity;
+	
+	constructor() {
+		this.velocity = TILE_WIDTH / 8.0;
+	}
+	
+	function update() {
+		dx = this.actualX - this.renderX;
+		dy = this.actualY - this.renderY;
+		dist = (dx ** 2 + dy ** 2) ** .5;
+		if (dist < this.velocity) {
+			this.renderX = this.actualX;
+			this.renderY = this.actualY;
+			this.isDirty = false;
+		} else {
+			this.renderX += this.velocity * dx / dist;
+			this.renderY += this.velocity * dy / dist;
+		}
+	}
+	
+	function setActual(x, y) {
+		this.actualX = x + 0.0;
+		this.actualY = y + 0.0;
+		if (this.renderX == null) {
+			this.renderX = this.actualX;
+			this.renderY = this.actualY;
+		} else {
+			this.isDirty = true;
+		}
+	}
+}

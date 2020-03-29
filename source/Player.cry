@@ -1,0 +1,79 @@
+import Math;
+
+class Player {
+
+	field id;
+	field col;
+	field row;
+	field color;
+	field direction;
+	field munch_counter;
+	field images_by_color_by_direction_by_bool;
+	field colors_by_id;
+	
+	field interpolatingObject = new InterpolatingObject();
+	field interpolatingToken = null;
+	field renderCoords = [0, 0];
+	
+	// set this to (dx * 10 + dy)
+	field freezeMovementUntilInputChange = -99;
+	// This decrements each frame. When it goes below 0, it invalidates the above token.
+	field freezeInvalidationCounter = -1;
+	
+	constructor(id, col, row, direction, color) {
+		this.id = id;
+		this.col = col;
+		this.row = row;
+		
+		this.interpolatingObject.setActual(col * TILE_WIDTH, row * TILE_WIDTH);
+		
+		this.color = color;
+		this.direction = direction;
+		this.munch_counter = -1;
+		this.images_by_color_by_direction_by_bool = {};
+		
+		this.colors_by_id = [null] * 7;
+		this.colors_by_id[Colors.RED] = 'red';
+		this.colors_by_id[Colors.ORANGE] = 'orange';
+		this.colors_by_id[Colors.YELLOW] = 'yellow';
+		this.colors_by_id[Colors.GREEN] = 'green';
+		this.colors_by_id[Colors.BLUE] = 'blue';
+		this.colors_by_id[Colors.PURPLE] = 'purple';
+	}
+	
+	function update() {
+		if (this.freezeInvalidationCounter-- < 0) {
+			this.freezeMovementUntilInputChange = -99;
+		}
+		
+		this.munch_counter--;
+		
+		iToken = this.col * 100 + this.row;
+		if (iToken != this.interpolatingToken) {
+			this.interpolatingObject.setActual(this.col * TILE_WIDTH, this.row * TILE_WIDTH);
+			this.interpolatingToken = iToken;
+		}
+		
+		if (this.interpolatingObject.isDirty) {
+			this.interpolatingObject.update();
+		}
+	}
+	
+	function getRenderCoords() {
+		this.renderCoords[0] = Math.floor(this.interpolatingObject.renderX);
+		this.renderCoords[1] = Math.floor(this.interpolatingObject.renderY);
+		return this.renderCoords;
+	}
+	
+	function get_image(rc) {
+		key = 'player/' + this.colors_by_id[this.color] + '/' + this.direction + '_';
+		munching = this.munch_counter > 0;
+		
+		if (munching) {
+			key += 'chew_' + ((rc / 3) % 2 + 1);
+		} else {
+			key += ((rc / 5) % 3 + 1);
+		}
+		return ImageLibrary.get_image(key);
+	}
+}

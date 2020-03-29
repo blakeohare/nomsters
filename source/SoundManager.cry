@@ -1,0 +1,9 @@
+class SoundManager {
+	constructor() {
+		
+	}
+	
+	function play_sound(key) {
+		// TODO: this
+	}
+}

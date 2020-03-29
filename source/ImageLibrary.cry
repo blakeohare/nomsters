@@ -1,0 +1,34 @@
+import TwoCansAlpha4;
+
+class ImageLibrary {
+
+	static field _images = {};
+	static field reversals = {};
+
+	static constructor() {
+		for (color : 'red orange yellow green blue purple'.split(' '))  {
+			ImageLibrary.reversals['player/' + color + '/left_1'] = 'player/' + color + '/right_1';
+			ImageLibrary.reversals['player/' + color + '/left_2'] = 'player/' + color + '/right_2';
+			ImageLibrary.reversals['player/' + color + '/left_3'] = 'player/' + color + '/right_3';
+			ImageLibrary.reversals['player/' + color + '/left_chew_1'] = 'player/' + color + '/right_1';
+			ImageLibrary.reversals['player/' + color + '/left_chew_2'] = 'player/' + color + '/right_chew_2';
+		}
+	}
+	
+	static function get_image(path) {
+		img = ImageLibrary._images.get(path, null);
+		if (img == null) {
+			reversal = ImageLibrary.reversals.get(path, null);
+			if (reversal != null) {
+				img = ImageLibrary.get_image(reversal).flip(true, false);
+			} else {
+				img = Images.get('images/' + path + '.png');
+			}
+			ImageLibrary._images[path] = img;
+			if (img == null) {
+				throw new Exception("Image not found: '" + path + "'");
+			}
+		}
+		return img;
+	}
+}

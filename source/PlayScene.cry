@@ -1,0 +1,124 @@
+import TwoCansAlpha4;
+
+class PlayScene : AbstractScene {
+
+	field mode;
+	field theme;
+	field boards;
+	field player1active;
+	field player2active;
+
+	constructor(type) : base() {
+		this.mode = new GameMode(type);
+		Globals.THEMES.shuffle();
+		this.theme = Globals.THEMES[0];
+		this.boards = [];
+		for (i = 0; i < this.mode.boards; ++i) {
+			this.boards.add(new Board(i + 1, this.theme, this.mode));
+		}
+		
+		this.player1active = true;
+		this.player2active = this.mode.players_total > 1;
+	}
+	
+	/* This function is relatively hard coded. */
+	function get_board_and_player(id) {
+		if (this.boards.length == 2 && id == 2) {
+			board = this.boards[1];
+			player = board.players[0];
+		} else {
+			board = this.boards[0];
+			player = board.players[id - 1];
+		}
+		
+		return [board, player];
+	}
+	
+	function update(inputManager, events) {
+		
+		for (board : this.boards) {
+			board.updateFirstPass(this);
+		}
+		
+		axisValue = inputManager.getAxis(ConsoleButton.AXIS1);
+		
+		board_and_player = this.get_board_and_player(1);
+		board = board_and_player[0];
+		player = board_and_player[1];
+		
+		xValue = axisValue[0];
+		yValue = axisValue[1];
+		if (xValue < -.5) xValue = -1;
+		else if (xValue > .5) xValue = 1;
+		else xValue = 0;
+		if (yValue < -.5) yValue = -1;
+		else if (yValue > .5) yValue = 1;
+		else yValue = 0;
+		
+		board.tryMoveVector(player, xValue, yValue);
+		
+		for (e : events) {
+			switch (e.type) {
+				
+				// TODO: this is wrong. Use canonicalized button pushes from the axis.
+				// But for now, the menu event queue will do.
+				case EventType.MENU:
+					switch (e.button) {
+						case MenuCommand.CONFIRM: board.do_bonk(player); break;
+						case MenuCommand.BACK:
+							this.switchScene(new PauseScene(this)); 
+							break;
+					}
+					break;
+				
+				default: break;
+			}
+		}
+		
+		for (board : this.boards) {
+			board.updateSecondPass(this);
+			
+			if (board.state != null) {
+				switch (board.state) {
+					case 'win':
+						if (this.boards.length > 1 && this.mode.players_per_board == 1) {
+							this.switchScene(new VictoryScene(this, 'p' + board.id + 'win'));
+						} else {
+							this.switchScene(new VictoryScene(this, 'win'));
+						}
+						break;
+					case 'lose':
+						if (this.boards.length > 1) {
+							id = board.id;
+							winnerId = 3 - id;
+							this.switchScene(new VictoryScene(this, 'p' + winnerId + 'win'));
+						} else {
+							this.switchScene(new VictoryScene(this, 'lose'));
+						}
+						break;
+					default:
+						this.switchScene(new VictoryScene(this, board.state));
+						break;
+				}
+			}
+		}
+		
+	}
+	
+	field _rc = 0;
+	function render() {
+		bg = ImageLibrary.get_image('backgrounds/' + this.theme);
+		bg.drawRegionStretched(
+			0, 0,
+			GAME_WIDTH, GAME_HEIGHT,
+			0, 0,
+			bg.width, bg.height);
+	
+		
+		for (board : this.boards) {
+			board.render(this._rc);
+		}
+		
+		this._rc++;
+	}
+}

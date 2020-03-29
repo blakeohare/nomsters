@@ -1,0 +1,14 @@
+class Event {
+	
+	field action;
+	field x;
+	field y;
+	field player;
+	
+	constructor(action, x, y, player) {
+		this.action = action;
+		this.x = x;
+		this.y = y;
+		this.player = player;
+	}
+}

@@ -1,0 +1,51 @@
+class Tile {
+
+	field color;
+	field col;
+	field row;
+	field special;
+	field death_counter;
+	field dead;
+	field passable;
+
+	constructor(color, col, row) {
+		this.color = color;
+		this.col = col;
+		this.row = row;
+		this.special = false;
+		this.death_counter = 999;
+		this.dead = false;
+		this.passable = false;
+	}
+	
+	function render_special(x, y, rc, img, explode_images) {
+		if (this.death_counter < 999) {
+			if (this.death_counter >= 0) {
+				this.dead = true;
+			} else {
+				dc = -this.death_counter;
+				overlay = null;
+				if (dc <= explode_images.length) {
+					overlay = explode_images[explode_images.length - dc];
+				}
+				
+				img.drawRegionStretched( 
+					x, y,
+					32, 32,
+					0, 0,
+					16, 16);
+				if (overlay != null) {
+					overlay.drawRegionStretched(
+						x, y,
+						32, 32,
+						0, 0,
+						16, 16);
+				}
+			}
+			
+			//Graphics2D.Draw.rectangle(x, y, TILE_WIDTH, TILE_WIDTH, 255, 255, 255, 100);
+			
+			this.death_counter++;
+		} 
+	}
+}

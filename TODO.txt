@@ -1,0 +1,26 @@
+tiles slide out
+
+explosion animations need more energy
+
+screen shakes
+
+cut 2 player support
+
+create several gameplay modes
+
+GIF recorder
+
+put something on the side, like the player charicature
+
+score screen that shows various stats
+- times chewed
+- squares moved
+- number of falls
+
+powerups that clear when adjacent things clear
+
+announcements like combo, danger, etc show up obnoxiously on the screen batman-fight style
+
+Audio
+- sound
+- music
